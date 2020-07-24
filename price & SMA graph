@@ -1,0 +1,33 @@
+import pandas as pd
+from alpha_vantage.timeseries import TimeSeries
+from alpha_vantage.techindicators import TechIndicators
+import matplotlib.pyplot as plt
+plt.rcParams['figure.figsize'] = (19,9)
+
+api_key ="XXXXXX" #aquí escribí la key de alpha vantage, se obtiene GRATIS en menos de 1 minuto https://www.alphavantage.co/support/#api-key
+
+period =200
+
+symbol="BAC"
+
+ti = TechIndicators(key=api_key, output_format="pandas") #para pedir los indicadores a esta variable
+ts = TimeSeries(key=api_key, output_format="pandas") #para pedir la info usaremos esta variable
+data, meta_data = ts.get_daily(symbol=symbol,outputsize="full") #abajamos los precios diarios
+data_ti, meta_data_ti = ti.get_sma(symbol=symbol, interval="daily", time_period= period, series_type="close") #abajamos el calculo de media movil simple
+                                  
+
+df1 = data_ti
+df2 = data["4. close"].iloc[period-1::] #le sacamos las 2ras 20 filas al df2 del precio cierre para igualarlo al  de SMA
+
+
+df2.index=df1.index #igualamos los índices para evitar problemas en la concatenacion
+
+total_df = pd.concat([df1,df2],axis=1) #JUNTAMOS AMBOS DF 
+
+
+#acá armamos un gráfico que muestre el precio y la SMA 30 (stan weinstein)
+
+
+total_df.plot()
+plt.title(symbol+ " - " + "Precio Cierre y SMA"+str(period))
+plt.show()
